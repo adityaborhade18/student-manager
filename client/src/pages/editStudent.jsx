@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 function EditStudent() {
   const { id } = useParams();
@@ -29,22 +30,24 @@ function EditStudent() {
     setStudent({ ...student, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
 
     // Simple validation
     if (!student.name || !student.email || !student.age || !student.branch || !student.year) {
-      alert("Please fill all fields!");
+      toast.error("Please fill in all fields");
       return;
     }
-
-    axios.put(`http://localhost:5000/api/students/${id}`, student)
-      .then(() => {
-        alert("Student updated successfully!");
-        navigate("/"); // Redirect to student list
-      })
-      .catch(err => console.error(err));
-  };
+    try{
+    const {data}=await axios.put(`http://localhost:5000/api/students/update/${id}`, student);
+    if(data.success){
+      toast.success("Student updated successfully");
+      navigate("/");
+    }
+  }catch(err){
+    console.error(err);
+    toast.error("Failed to update student " + err.message);
+  }};
 
   if (loading) {
     return <p className="text-center mt-8">Loading student data...</p>;

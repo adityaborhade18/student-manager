@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 function AddStudent() {
   const navigate = useNavigate();
@@ -16,22 +17,29 @@ function AddStudent() {
     setStudent({ ...student, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
 
     // Simple validation
     if (!student.name || !student.email || !student.age || !student.branch || !student.year) {
-      alert("Please fill all fields!");
-      return;
+       toast.error("Please fill in all fields");
+       return;
     }
+    try{
+       const {data}=await axios.post("http://localhost:5000/api/students/create", student);
+       console.log("going request to backend",data);
 
-    axios.post("http://localhost:5000/api/students", student) // Replace with your backend URL
-      .then(() => {
-        alert("Student added successfully!");
-        navigate("/"); // Redirect to student list
-      })
-      .catch(err => console.error(err));
-  };
+       if(data.success){
+        
+         
+         navigate("/");
+       } 
+    toast.success("Student added successfully");
+    }catch(err){
+      console.error(err);
+      toast.error("Failed to add student",err.message);
+    }
+};
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded shadow-md">
